@@ -2,12 +2,14 @@
 import { redirect } from 'next/navigation';
 
 import { hashUserPassword, verifyPassword } from '@/lib/hash';
-import { createUser, findUser } from '@/lib/user';
+import { createUser, getUserByEmail } from '@/lib/user';
 import { createAuthSession, destroySession } from '@/lib/auth';
 
 export async function signup(prevState, formData) {
   const email = formData.get('email');
   const password = formData.get('password');
+  const firstName = formData.get('firstName');
+  const lastName = formData.get('lastName');
 
   let errors = {};
 
@@ -15,8 +17,16 @@ export async function signup(prevState, formData) {
     errors.email = 'Please enter a valid email address.';
   }
 
-  if (password.trim().length < 8) {
+  if (password.trim().length < 6) {
     errors.password = 'Password must be at least 8 characters long.';
+  }
+
+  if (firstName.trim().length === 0) {
+    errors.firstName = 'Please enter your first name.';
+  }
+
+  if (lastName.trim().length === 0) {
+    errors.lastName = 'Please enter your last name.';
   }
 
   if (Object.keys(errors).length > 0) {
@@ -27,15 +37,19 @@ export async function signup(prevState, formData) {
 
   const hashedPassword = hashUserPassword(password);
   try {
-    const id = createUser(email, hashedPassword);
+    const id = createUser({
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+    });
     await createAuthSession(id);
     redirect('/training');
   } catch (error) {
     if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       return {
         errors: {
-          email:
-            'It seems like an account for the chosen email already exists.',
+          email: 'It seems like an account for the chosen email already exists.',
         },
       };
     }
@@ -47,7 +61,7 @@ export async function login(prevState, formData) {
   const email = formData.get('email');
   const password = formData.get('password');
 
-  const existingUser = findUser(email);
+  const existingUser = getUserByEmail(email);
 
   if (!existingUser) {
     return {

@@ -3,9 +3,12 @@ import Link from 'next/link';
 import { useFormState } from 'react-dom';
 
 import { auth } from '@/actions/auth-actions';
+import { useState } from 'react';
 
 export default function AuthForm({ mode }) {
   const [formState, formAction] = useFormState(auth.bind(null, mode), {});
+  const [showPassword, setShowPassword] = useState(false);
+  const isLoginMode = mode === 'login';
   return (
     <form id="auth-form" action={formAction}>
       <div>
@@ -17,8 +20,25 @@ export default function AuthForm({ mode }) {
       </p>
       <p>
         <label htmlFor="password">Password</label>
-        <input type="password" name="password" id="password" />
+        <span style={{ display: 'flex', alignItems: 'center' }}>
+          <input type={showPassword ? 'text' : 'password'} name="password" id="password" style={{ flex: 1 }} />
+          <button type="button" onClick={() => setShowPassword((prev) => !prev)} style={{ marginLeft: '8px' }}>
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </span>
       </p>
+      {!isLoginMode && (
+        <p>
+          <label htmlFor="firstName">First Name</label>
+          <input type="firstName" name="firstName" id="email" />
+        </p>
+      )}
+      {!isLoginMode && (
+        <p>
+          <label htmlFor="lastName">Last Name</label>
+          <input type="lastName" name="lastName" id="email" />
+        </p>
+      )}
       {formState.errors && (
         <ul id="form-errors">
           {Object.keys(formState.errors).map((error) => (
@@ -27,17 +47,11 @@ export default function AuthForm({ mode }) {
         </ul>
       )}
       <p>
-        <button type="submit">
-          {mode === 'login' ? 'Login' : 'Create Account'}
-        </button>
+        <button type="submit">{isLoginMode ? 'Login' : 'Create Account'}</button>
       </p>
       <p>
-        {mode === 'login' && (
-          <Link href="/?mode=signup">Create an account.</Link>
-        )}
-        {mode === 'signup' && (
-          <Link href="/?mode=login">Login with existing account.</Link>
-        )}
+        {isLoginMode && <Link href="/?mode=signup">Create an account.</Link>}
+        {!isLoginMode && <Link href="/?mode=login">Login with existing account.</Link>}
       </p>
     </form>
   );
