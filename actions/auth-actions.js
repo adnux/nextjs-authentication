@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 
 import { hashUserPassword, verifyPassword } from '@/lib/hash';
 import { createUser, getUserByEmail } from '@/lib/user';
-import { createAuthSession, destroySession } from '@/lib/auth';
+import { createAuthSession, destroySession, INVALID_CREDENTIALS } from '@/lib/auth';
+
 
 export async function signup(prevState, formData) {
   const email = formData.get('email');
@@ -66,7 +67,7 @@ export async function login(prevState, formData) {
   if (!existingUser) {
     return {
       errors: {
-        email: 'Could not authenticate user, please check your credentials.',
+        credentials: INVALID_CREDENTIALS,
       },
     };
   }
@@ -76,7 +77,7 @@ export async function login(prevState, formData) {
   if (!isValidPassword) {
     return {
       errors: {
-        password: 'Could not authenticate user, please check your credentials.',
+        credentials: INVALID_CREDENTIALS,
       },
     };
   }

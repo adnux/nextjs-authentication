@@ -1,7 +1,7 @@
 import { logout } from '@/actions/auth-actions';
-import '../globals.css';
-import { getUserById } from '@/lib/user';
 import { verifyAuth } from '@/lib/auth';
+import { getUserById } from '@/lib/user';
+import '../globals.css';
 
 export const metadata = {
   title: 'Next Auth',
